@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10213b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>AP Engineering Hub</title>
+<style>
+:root{--navy:#10213b;--blue:#246bfe;--bg:#f3f6fb;--card:#fff;--muted:#64748b}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#172033}
+header{background:linear-gradient(135deg,#10213b,#2459a8);color:white;padding:24px 18px 28px}
+header h1{margin:0 0 7px;font-size:25px}header p{margin:0;color:#dbeafe;font-size:14px}
+main{max-width:850px;margin:auto;padding:16px}
+.tabs{display:flex;gap:8px;margin:0 0 16px}.tab{border:0;border-radius:10px;padding:11px 15px;background:#e1e9f7;color:#18345f;font-weight:700}.tab.active{background:var(--blue);color:white}
+.panel{display:none}.panel.active{display:block}
+input,select{width:100%;padding:13px;border:1px solid #d5deeb;border-radius:10px;font-size:16px;background:white;margin:7px 0 12px}
+label{font-weight:700;font-size:13px;color:#334155}
+.card{background:var(--card);padding:16px;border-radius:14px;margin:10px 0;box-shadow:0 3px 14px #10213b0c}
+.card h3{margin:0 0 6px;font-size:17px}.muted{color:var(--muted);font-size:13px;line-height:1.5}
+button.primary{background:var(--blue);color:white;border:0;border-radius:10px;padding:12px 15px;font-weight:700}
+button.secondary{background:#e9effa;color:#1e3a67;border:0;border-radius:9px;padding:9px 12px;font-weight:700}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.detail{background:#f6f8fc;border-radius:10px;padding:10px;font-size:14px}
+.notice{background:#fff7df;border:1px solid #f4dfa0;padding:12px;border-radius:10px;font-size:13px;line-height:1.5;margin:12px 0}
+.hidden{display:none}.pill{display:inline-block;background:#e8f0ff;color:#1d4ed8;border-radius:20px;padding:4px 8px;font-size:11px;margin-top:5px}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><h1>AP Engineering Hub</h1><p>Andhra Pradesh college finder + personal attendance tracker</p></header>
+<main>
+<div class="tabs">
+<button class="tab active" data-tab="colleges">Find Colleges</button>
+<button class="tab" data-tab="attendance">My Attendance</button>
+</div>
+<section id="colleges" class="panel active">
+<label for="search">Search college name or city</label>
+<input id="search" placeholder="Try Chirala, Bapatla, Ongole..." autocomplete="off">
+<div class="muted" id="count"></div>
+<div id="results"></div>
+<div class="notice"><b>Directory status:</b> This is a starter directory with a small set of sample entries, not a complete verified list of every AP engineering college. Confirm current courses, approvals, contact details and affiliation with the college or official regulator before relying on them.</div>
+</section>
+<section id="attendance" class="panel">
+<div class="card">
+<h3>Record a class</h3>
+<label>Subject</label><input id="subject" placeholder="Example: C Programming">
+<label>Date</label><input id="date" type="date">
+<label>Status</label><select id="status"><option>Present</option><option>Absent</option></select>
+<button class="primary" id="save">Save Attendance</button>
+</div>
+<div class="card"><h3>Attendance summary</h3><div id="summary" class="muted">No attendance records yet.</div><div id="records"></div></div>
+<div class="notice">Attendance is saved only in this browser on this device (local storage). It is not connected to your college's official attendance system and does not sync across devices.</div>
+</section>
+</main>
+<script>
+const colleges=[
+{name:"Chirala Engineering College",city:"Chirala",district:"Bapatla",address:"Akkayapalem (Post), Vetapalem Mandal, Chirala – 523157",university:"Jawaharlal Nehru Technological University, Kakinada",source:"UGC Autonomous Colleges list",year:"2025–2026",website:"",courses:"Check the college's current official course list."},
+{name:"St. Ann’s College of Engineering & Technology",city:"Chirala",district:"Bapatla",address:"Nayunipalli Village, Challareddypalem Post, Vetapalem Mandal, Chirala – 523187",university:"Jawaharlal Nehru Technological University, Kakinada",source:"UGC Autonomous Colleges list",year:"2022–2023",website:"",courses:"Check the college's current official course list."},
+{name:"QIS College of Engineering & Technology",city:"Ongole",district:"Prakasam",address:"Vengamukkapalem, Pondur Road, Ongole",university:"Jawaharlal Nehru Technological University, Kakinada",source:"UGC Autonomous Colleges list",year:"2015–2016",website:"",courses:"Check the college's current official course list."},
+{name:"PACE Institute of Technology & Sciences",city:"Ongole",district:"Prakasam",address:"NH-16, near Valluramma Temple, Ongole – 523272",university:"Jawaharlal Nehru Technological University, Kakinada",source:"UGC Autonomous Colleges list",year:"2018–2019",website:"",courses:"Check the college's current official course list."},
+{name:"Prakasam Engineering College",city:"Kandukur",district:"Prakasam",address:"O V Road, Kandukur – 523105",university:"Jawaharlal Nehru Technological University, Kakinada",source:"UGC Autonomous Colleges list",year:"2023–2024",website:"",courses:"Check the college's current official course list."},
+{name:"Narasaraopeta Engineering College",city:"Narasaraopet",district:"Palnadu",address:"Kotappakonda Road, Yellamanda Post, Narasaraopeta – 522601",university:"Jawaharlal Nehru Technological University, Kakinada",source:"UGC Autonomous Colleges list",year:"2016–2017",website:"",courses:"Check the college's current official course list."},
+{name:"G.M.R. Institute of Technology",city:"Rajam",district:"Srikakulam",address:"GMR Nagar, Rajam – 532127",university:"Jawaharlal Nehru Technological University, Kakinada",source:"UGC Autonomous Colleges list",year:"2012–2013",website:"",courses:"Check the college's current official course list."},
+{name:"Lakireddy Bali Reddy College of Engineering",city:"Mylavaram",district:"NTR",address:"Mylavaram, Andhra Pradesh",university:"Jawaharlal Nehru Technological University, Kakinada",source:"UGC Autonomous Colleges list",year:"2010–2011",website:"",courses:"Check the college's current official course list."}
+];
+const results=document.getElementById('results'), search=document.getElementById('search');
+function render(list){
+ document.getElementById('count').textContent=list.length+' matching sample record(s)';
+ results.innerHTML='';
+ if(!list.length){results.innerHTML='<div class="card">No matching sample college. The directory is not complete yet.</div>';return;}
+ list.forEach(c=>{let el=document.createElement('div');el.className='card';el.innerHTML=`<h3>${c.name}</h3><div class="muted">${c.city}, ${c.district} District</div><span class="pill">Sample directory entry</span><p><button class="secondary">View details</button></p>`;el.querySelector('button').onclick=()=>showDetails(c);results.appendChild(el)});
+}
+function showDetails(c){
+ results.innerHTML=`<div class="card"><button class="secondary" id="back">← Back to results</button><h2>${c.name}</h2><div class="grid"><div class="detail"><b>City</b><br>${c.city}</div><div class="detail"><b>District</b><br>${c.district}</div><div class="detail"><b>Address</b><br>${c.address}</div><div class="detail"><b>Affiliating university (listed)</b><br>${c.university}</div><div class="detail"><b>Courses</b><br>${c.courses}</div><div class="detail"><b>Source/year shown</b><br>${c.source}; ${c.year}</div></div><p class="muted">Official website/contact details are not populated in this starter version because they have not been independently verified.</p></div>`;
+ document.getElementById('back').onclick=()=>render(filter(search.value));
+}
+function filter(q){q=q.toLowerCase().trim();return colleges.filter(c=>(c.name+' '+c.city+' '+c.district+' '+c.address).toLowerCase().includes(q))}
+search.addEventListener('input',()=>render(filter(search.value)));render(colleges);
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab,.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active')});
+const key='apHubAttendanceV1';let data=JSON.parse(localStorage.getItem(key)||'[]');
+document.getElementById('date').value=new Date().toISOString().slice(0,10);
+function attendanceRender(){
+ const present=data.filter(x=>x.status==='Present').length,total=data.length,pct=total?Math.round(present/total*100):0;
+ document.getElementById('summary').textContent=total?`${present} Present / ${total} total classes — ${pct}% attendance`:'No attendance records yet.';
+ document.getElementById('records').innerHTML=data.slice().reverse().map(x=>`<p class="muted">${x.date} · ${x.subject} · <b>${x.status}</b></p>`).join('');
+}
+document.getElementById('save').onclick=()=>{let subject=document.getElementById('subject').value.trim(),date=document.getElementById('date').value,status=document.getElementById('status').value;if(!subject||!date){alert('Enter subject and date.');return;}data.push({subject,date,status});localStorage.setItem(key,JSON.stringify(data));document.getElementById('subject').value='';attendanceRender();};
+attendanceRender();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.log('Offline setup unavailable:', err));
+  });
+}
+</script>
+</body></html>
